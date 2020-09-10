@@ -21,6 +21,7 @@
     "react-navigation": "^4.4.0",
     "react-navigation-stack": "^2.8.2",
     "reactotron-react-native": "^5.0.0",
+    "styled-components": "^5.2.0",
     "yarn": "^1.22.5"
   },
   "devDependencies": {
