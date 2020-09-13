@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 import PropTypes from 'prop-types';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {
@@ -42,28 +43,24 @@ export default class Repository extends Component {
     }
 
     async componentDidMount() {
-        // const { navigation } = this.props;
-        // const user = navigation.getParam('user');
+        const { navigation } = this.props;
+        const user = navigation.getParam('user');
 
-        // const response = await api.get(`/search/${user.name}`);
+        const [userAvatar, repositories] = await Promise.all([
+            axios.get(`https://api.github.com/users/${user.githubId}`),
+            api.get('/repositories', { headers: {
+                'Authorization': `Bearer ${user.token}`
+            }}),
+        ]);
 
-        // this.setState({ character: response.data.results });
+        console.tron.log(userAvatar)
+        console.tron.log(repositories)
 
-
-        // const { user } = this.props;
-
-        // const [userAvatar, repositories] = await Promise.all([
-        //     axios.get(`https://api.github.com/users/${user.githubId}`),
-        //     api.get('/repositories', { headers: {
-        //         'Authorization': `Bearer ${user.token}`
-        //     }}),
-        // ]);
-
-        // this.setState({
-        //     userAvatar: userAvatar.data.avatar_url,
-        //     repositories: repositories.data.starredRepositories,
-        //     loading: 0,
-        // })
+        this.setState({
+            userAvatar: userAvatar.data.avatar_url,
+            repositories: repositories.data.starredRepositories,
+            loading: 0,
+        })
     }
 
     handleInputChange = (event, fieldName) => {
@@ -186,27 +183,27 @@ export default class Repository extends Component {
 
         return (
             <Container>
-                {/*
                 <Header>
-                    <Avatar source={{ uri: user.avatar }} />
-                    <Name>{user.name}</Name>
-                    <Bio>{user.biography}</Bio>
+                    <Avatar source={{ uri: userAvatar }} />
+                    {/* <Name>{user.name}</Name>
+                    <Bio>{user.biography}</Bio> */}
                 </Header>
 
                 <Character
-                    data={character}
-                    keyExtractor={character => String(character.id)}
-                    renderItem={({ item: character }) => (
+                    data={repositories}
+                    keyExtractor={repository => String(repository.id)}
+                    renderItem={({ item: repository }) => (
                         <Starred>
-                            <OwnerAvatar source={{ uri: character.image.url }} />
+                            <OwnerAvatar source={{ uri: repository.url }} />
                             <Info>
-                                <Title>{character.biography['full-name']}</Title>
-                                <Author>{character.biography['first-appearance']}</Author>
+                                <Title>{repository.name}</Title>
+                                <Author>{repository.description}</Author>
                             </Info>
                         </Starred>
                     )}
-                />
+                    />
 
+                {/*
                 */}
                 {/*
 
