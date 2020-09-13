@@ -1,35 +1,44 @@
 import styled from 'styled-components/native';
 import { RectButton } from 'react-native-gesture-handler';
 
-export const Container = styled.View`
-  flex: 1;
-  padding: 30px;
-  background: #333;
+export const Form = styled.View`
+    border-color: #EEE;
+    flex-direction: column;
+    padding-bottom: 20px;
 `;
 
-export const Form = styled.View`
-    flex-direction: row;
+export const FormText = styled.Text`
+    color: #FFF;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
     padding-bottom: 20px;
-    border-bottom-width: 1px;
-    border-color: #EEE;
 `;
 
 export const Input = styled.TextInput.attrs({
     placeholderTextColor: '#999',
 })`
-    flex: 1;
     height: 40px;
     background: #EEE;
     border-radius: 4px;
     padding: 0 15px;
     border: 1px solid #EEE;
+    margin-top: 12px;
 `;
 
 export const SubmitButton = styled(RectButton)`
+    background: #2EA44F;
     justify-content: center;
     align-items: center;
-    background: #7159c1;
     border-radius: 4px;
-    margin-left: 10px;
+    margin-top: 17px;
     padding: 0 12px;
+    height: 40px;
+    opacity: ${props => (props.loading ? 0.7 : 1)};
+`;
+
+export const ButtonText= styled.Text`
+    color: #FFF;
+    font-size: 14px;
+    font-weight: bold;
 `;
