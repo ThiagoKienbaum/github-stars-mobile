@@ -30,55 +30,34 @@ export default class Main extends Component {
            confirmPassword: '',
         },
         loading: 0,
-        errorMessage: null,
-        signUpLogin: false,
-        behaviour: 'position',
     }
 
-    signInHandleSubmit = async event => {
+    signInHandleSubmit = async () => {
         this.setState({ loading: 1 });
-        const { dispatch } = this.props;
         const {email, password} = this.state.signIn;
-        const { signUpLogin } = this.state;
-
-        if (!signUpLogin) event.preventDefault();
 
         await api.post('/sessions', {
             email,
             password
-        }).then(response => {
-            const data = {
-                id: response.data.user.id,
-                name: response.data.user.name,
-                githubId: response.data.user.github_id,
-                email: response.data.user.email,
-                token: response.data.token,
+        }).then(res => {
+            const user = {
+                id: res.data.user.id,
+                name: res.data.user.name,
+                githubId: res.data.user.github_id,
+                email: res.data.user.email,
+                token: res.data.token,
             }
 
-            this.setState({
-                loading: 0,
-            });
+            this.setState({ loading: 0 });
 
-            dispatch({
-                type: 'USER_LOGIN',
-                data,
-            })
+            Keyboard.dismiss();
 
-            this.props.history.push('/repository');
-        }).catch(response => {
-            this.setState({
-                errorMessage: response.message,
-                loading: 0,
-            });
+            this.handleNavigate(user);
         })
-
-        Keyboard.dismiss();
     }
 
-    signUpHandleSubmit = async event => {
-        event.preventDefault();
+    signUpHandleSubmit = async () => {
         this.setState({ loading: 1 });
-
         const { name, githubId, email, password, confirmPassword } = this.state.signUp;
 
         await api.post('/users', {
@@ -87,34 +66,27 @@ export default class Main extends Component {
             email,
             password,
             confirmPassword
-        }).then(() => {
+        }).then(res => {
             this.setState({
-                loading: 0,
-                signUpLogin: true,
                 signIn: {
                     email,
                     password,
-                }
+                },
+                loading: 0
             });
-            this.signInHandleSubmit();
-        }).catch(response => {
-            this.setState({
-                errorMessage: response.message,
-                loading: 0,
-            });
-        })
 
-        Keyboard.dismiss();
+            this.signInHandleSubmit();
+        })
     }
 
-    handleNavigate = user => {
-        const { navigation } = this.props;
+    handleNavigate = (user) => {
+        const { navigate } = this.props.navigation;
 
-        navigation.navigate('Repository', { user });
+        navigate('Repository', { user: user });
     };
 
     render() {
-        const { signIn, signUp, loading, errorMessage, behaviour } = this.state;
+        const { signIn, signUp, loading } = this.state;
 
         return (
             <KeyboardAwareScrollView
@@ -130,20 +102,20 @@ export default class Main extends Component {
                     <Input
                         autoCorrect={false}
                         autoCapitalize="none"
-                        type="email"
+                        autoCompleteType="email"
                         placeholder="Email"
                         value={signIn.email}
-                        onChangeText={text => this.setState({ signIn: { email: text } })}
+                        onChangeText={text => this.setState({ signIn: { ...this.state.signIn, email: text } })}
                         returnKeyType="send"
                         onSubmitEditing={this.signInHandleSubmit}
                     />
                     <Input
                         autoCorrect={false}
                         autoCapitalize="none"
-                        type="password"
+                        secureTextEntry={true}
                         placeholder="Password"
                         value={signIn.password}
-                        onChangeText={text => this.setState({ signIn: { password: text } })}
+                        onChangeText={text => this.setState({ signIn: { ...this.state.signIn, password: text } })}
                         returnKeyType="send"
                         onSubmitEditing={this.signInHandleSubmit}
                     />
@@ -162,7 +134,7 @@ export default class Main extends Component {
                         autoCorrect={false}
                         placeholder="Name"
                         value={signUp.name}
-                        onChangeText={text => this.setState({ signUp: { name: text } })}
+                        onChangeText={text => this.setState({ signUp: { ...this.state.signUp, name: text } })}
                         returnKeyType="send"
                         onSubmitEditing={this.signUpHandleSubmit}
                     />
@@ -171,37 +143,37 @@ export default class Main extends Component {
                         autoCapitalize="none"
                         placeholder="GitHub ID"
                         value={signUp.githubId}
-                        onChangeText={text => this.setState({ signUp: { githubId: text } })}
+                        onChangeText={text => this.setState({ signUp: { ...this.state.signUp, githubId: text } })}
                         returnKeyType="send"
                         onSubmitEditing={this.signUpHandleSubmit}
                     />
                     <Input
                         autoCorrect={false}
                         autoCapitalize="none"
-                        type="email"
+                        autoCompleteType="email"
                         placeholder="Email"
                         value={signUp.email}
-                        onChangeText={text => this.setState({ signUp: { email: text } })}
+                        onChangeText={text => this.setState({ signUp: { ...this.state.signUp, email: text } })}
                         returnKeyType="send"
                         onSubmitEditing={this.signUpHandleSubmit}
                     />
                     <Input
                         autoCorrect={false}
                         autoCapitalize="none"
-                        type="password"
+                        secureTextEntry={true}
                         placeholder="Password"
                         value={signUp.password}
-                        onChangeText={text => this.setState({ signUp: { password: text } })}
+                        onChangeText={text => this.setState({ signUp: { ...this.state.signUp, password: text } })}
                         returnKeyType="send"
                         onSubmitEditing={this.signUpHandleSubmit}
                     />
                      <Input
                         autoCorrect={false}
                         autoCapitalize="none"
-                        type="password"
+                        secureTextEntry={true}
                         placeholder="Confirm Password"
                         value={signUp.confirmPassword}
-                        onChangeText={text => this.setState({ signUp: { confirmPassword: text } })}
+                        onChangeText={text => this.setState({ signUp: { ...this.state.signUp, confirmPassword: text } })}
                         returnKeyType="send"
                         onSubmitEditing={this.signUpHandleSubmit}
                     />
