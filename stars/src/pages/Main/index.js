@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { ActivityIndicator, Keyboard } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
-import { Form, FormText, ButtonText, Input, SubmitButton } from './styles';
+import { Form, FormText, Input, SubmitButton, ButtonText } from './styles';
 import api from '../../services/api';
 
 export default class Main extends Component {
