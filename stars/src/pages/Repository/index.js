@@ -1,25 +1,34 @@
 import React, { Component } from 'react';
+import { ActivityIndicator, Keyboard } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import axios from 'axios';
 import PropTypes from 'prop-types';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import {
-    Container,
     Header,
     Avatar,
     Name,
-    Bio,
-    Character,
+    Form,
+    Input,
+    FilterButton,
+    Container,
+    Repositories,
     Starred,
     OwnerAvatar,
     Info,
     Title,
-    Author,
+    Description,
+    Tags,
+    Tag,
+    EditTagForm,
+    EditTagButton,
+    AddTagForm,
+    AddTagButton,
 } from './styles';
 import api from '../../services/api';
 
 export default class Repository extends Component {
     static navigationOptions = ({ navigation }) => ({
-        // title: navigation.getParam('user').name,
         title: 'Repositories',
     });
 
@@ -34,7 +43,7 @@ export default class Repository extends Component {
         loading: 1,
         addTag: [],
         showTag: '',
-        editTag: [],
+        editTag: '',
         repositories: [],
         errorMessage: null,
         isInEditMode: false,
@@ -61,11 +70,6 @@ export default class Repository extends Component {
             repositories: repositories.data.starredRepositories,
             loading: 0,
         })
-    }
-
-    handleInputChange = (event, fieldName) => {
-        // const { value } = event.target;
-        // this.setState({ [fieldName]: value })
     }
 
     handleTagAdd = async (event, id) => {
@@ -182,136 +186,89 @@ export default class Repository extends Component {
         const user = navigation.getParam('user');
 
         return (
-            <Container>
+            <KeyboardAwareScrollView
+                style={{
+                    flex: 1,
+                    padding: 15,
+                    backgroundColor: '#24292E'
+                }}
+                resetScrollToCoords={{ x: 0, y: 0 }}
+            >
                 <Header>
                     <Avatar source={{ uri: userAvatar }} />
-                    {/* <Name>{user.name}</Name>
-                    <Bio>{user.biography}</Bio> */}
+                    <Name>{user.name}</Name>
                 </Header>
 
-                <Character
+                <Form>
+                    <Input
+                        placeholder="Filter by Tag"
+                        value={showTag}
+                        onChangeText={text => this.setState({ showTag: text })}
+                        returnKeyType="send"
+                        onSubmitEditing={this.handleTagShow}
+                    />
+                    <FilterButton onPress={this.handleTagShow}>
+                        <Icon
+                            name="filter-alt"
+                            size={20}
+                            color="#FFF"
+                        />
+                    </FilterButton>
+                </Form>
+
+                <Repositories
                     data={repositories}
                     keyExtractor={repository => String(repository.id)}
                     renderItem={({ item: repository }) => (
-                        <Starred>
-                            <OwnerAvatar source={{ uri: repository.url }} />
-                            <Info>
-                                <Title>{repository.name}</Title>
-                                <Author>{repository.description}</Author>
-                            </Info>
-                        </Starred>
-                    )}
-                    />
+                        <Container>
+                            <Starred>
+                                <OwnerAvatar source={{ uri: repository.owner_avatar }} />
+                                <Info>
+                                    <Title>{repository.name}</Title>
+                                    <Description>{repository.description}</Description>
+                                </Info>
+                            </Starred>
 
-                {/*
-                */}
-                {/*
-
-
-                <Owner>
-                    <img src={userAvatar} alt="User avatar" />
-                    <h1>{user.name}</h1>
-                </Owner>
-
-                <ShowForm onSubmit={this.handleTagShow}>
-                    <input
-                        type="text"
-                        placeholder="Filter by Tag"
-                        value={showTag}
-                        onChange={(event) => this.handleInputChange(event, 'showTag')}
-                    />
-                    <SubmitButton>
-                       <FaSearch />
-                    </SubmitButton>
-                </ShowForm>
-
-                {errorMessage && <h3 className="error"> {errorMessage} </h3>}
-
-                <Repositories>
-                    {repositories.map(repository => (
-                        <li>
-                            <img src={repository.owner_avatar} alt={user.name} />
-
-                            <div>
-                                <strong>
-                                    <a
-                                        href={repository.url}
-                                        rel="noopener noreferrer"
-                                        target="_blank"
-                                    >
-                                        {repository.name}
-                                    </a>
-                                </strong>
-
-                                <h5>{repository.description}</h5>
-
-                                {repository.tags.map(tag => (
-                                    <span key={String(`${repository.id}-${tag}`)}>
-                                        {(isInEditMode && repository.id === editedFormId && tag === editedTag) ?
-                                            <form
-                                                key={String(`${repository.id}-${tag}`)}
-                                                onSubmit={(event) => this.handleTagEdit(event, repository.id, tag)}
-                                            >
-                                                <input
-                                                    key={String(`edit-${repository.id}-${tag}`)}
-                                                    type="text"
-                                                    placeholder={tag}
-                                                    value={editTag[repository.id]}
-                                                    onChange={(event) => this.handleInputChange(event, 'editTag')}
-                                                />
-                                                <button
-                                                    key={String(`edit-${repository.id}-${tag}`)}
-                                                    type="submit"
-                                                >
-                                                    <FaCheck />
-                                                </button>
-
-                                                <button
-                                                    key={String(`editToggle-${repository.id}-${tag}`)}
-                                                    type="submit"
-                                                    onClick={(event) => this.editModeToggle(event, repository.id, tag)}
-                                                >
-                                                    <FaTimes />
-                                                </button>
-                                            </form>
-                                            : tag }
-
-                                        <FaPen
-                                            onClick={(event) => this.editModeToggle(event, repository.id, tag)}
-                                            key={String(`edit-${repository.id}-${tag}`)}
+                            <Tags
+                                data={repository.tags}
+                                keyExtractor={tag => String(`${tag}-${repository.id}`)}
+                                renderItem={({ item: tag }) => (
+                                    <Tag>
+                                        {tag}
+                                        <Icon
+                                            name="edit"
+                                            size={20}
+                                            color="#FFF"
                                         />
-
-                                        <FaTrashAlt
-                                            onClick={(event) => this.handleTagDelete(event, repository.id, tag)}
-                                            key={String(`delete-${repository.id}-${tag}`)}
+                                        <Icon
+                                            name="delete"
+                                            size={20}
+                                            color="#FFF"
                                         />
-                                    </span>
-                                ))}
+                                    </Tag>
+                                )}
+                            />
 
-                                <AddForm
-                                    key={String(`AddForm-${repository.id}`)}
-                                    onSubmit={(event) => this.handleTagAdd(event, repository.id)}
-                                >
-                                    <input
-                                        type="text"
-                                        placeholder="Add a new Tag"
-                                        value={addTag[repository.id]}
-                                        onChange={(event) => this.handleInputChange(event, 'addTag')}
+                            <AddTagForm>
+                                <Input
+                                    placeholder="Add a new Tag"
+                                    value={addTag}
+                                    onChangeText={text => this.setState({ addTag: text })}
+                                    returnKeyType="send"
+                                    onSubmitEditing={this.handleTagAdd(repository.id)}
+                                />
+                                <AddTagButton onPress={this.handleTagAdd(repository.id)}>
+                                    <Icon
+                                        name="add"
+                                        size={20}
+                                        color="#FFF"
                                     />
-                                    <SubmitButton key={String(`SubmitButton-${repository.id}`)}>
-                                        <FaPlus />
-                                    </SubmitButton>
-
-                                    <p>id: {repository.id}</p>
-                                </AddForm>
-                            </div>
-                        </li>
-                    ))};
-                </Repositories>
-
-                */}
-
-            </Container>
+                                </AddTagButton>
+                            </AddTagForm>
+                        </Container>
+                    )}
+                />
+            </KeyboardAwareScrollView>
         )
     }
 };
