@@ -49,6 +49,7 @@ export default class Repository extends Component {
         isInEditMode: false,
         editedFormId: '',
         editedTag: '',
+        token: '',
     }
 
     async componentDidMount() {
@@ -62,13 +63,11 @@ export default class Repository extends Component {
             }}),
         ]);
 
-        console.tron.log(userAvatar)
-        console.tron.log(repositories)
-
         this.setState({
             userAvatar: userAvatar.data.avatar_url,
             repositories: repositories.data.starredRepositories,
             loading: 0,
+            token: user.token,
         })
     }
 
@@ -93,23 +92,21 @@ export default class Repository extends Component {
         // })
     }
 
-    handleTagShow = async event => {
-        // event.preventDefault();
-        // const { token } = this.props.user;
-        // const { showTag } = this.state;
+    handleTagShow = async () => {
+        const { showTag, token } = this.state;
 
-        // await api.get(`/tags/${showTag}`, {
-        //     headers: {
-        //         'Authorization': `Bearer ${token}`
-        //     },
-        // }).then(response => {
-        //     this.setState({
-        //         showTag: '',
-        //         repositories: response.data,
-        //     });
-        // }).catch(() => {
-        //     this.getRepositories();
-        // })
+        await api.get(`/tags/${showTag}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+        }).then(res => {
+            this.setState({
+                showTag: '',
+                repositories: res.data,
+            });
+        }).catch(() => {
+            this.getRepositories();
+        })
     }
 
     handleTagEdit = async (event, id, tag) => {
@@ -148,17 +145,17 @@ export default class Repository extends Component {
     }
 
     getRepositories = async () => {
-        // const { user } = this.props;
+        const { token } = this.state;
 
-        // const repositories = await api.get('/repositories', {
-        //     headers: {
-        //         'Authorization': `Bearer ${user.token}`
-        //     }
-        // })
-
-        // this.setState({
-        //     repositories: repositories.data.starredRepositories,
-        // })
+        await api.get('/repositories', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        }).then(res => {
+            this.setState({
+                repositories: res.data.starredRepositories,
+            })
+        })
     }
 
     editModeToggle = (event, id, tag) => {
@@ -237,12 +234,12 @@ export default class Repository extends Component {
                                         {tag}
                                         <Icon
                                             name="edit"
-                                            size={20}
+                                            size={10}
                                             color="#FFF"
                                         />
                                         <Icon
                                             name="delete"
-                                            size={20}
+                                            size={10}
                                             color="#FFF"
                                         />
                                     </Tag>
